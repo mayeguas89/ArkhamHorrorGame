@@ -1,0 +1,64 @@
+{
+  "investigators": [
+    {
+      "name": "Roland Banks",
+      "faction": "guardian",
+      "traits": "Agency. Detective.",
+      "subname": "The Fed",
+      "skill_willpower": 3,
+      "skill_intellect": 3,
+      "skill_combat": 4,
+      "skill_agility": 2,
+      "health": 9,
+      "sanity": 5
+    },
+    {
+      "name": "Wendy Adams",
+      "faction": "survivor",
+      "traits": "Drifter.",
+      "subname": "The Urchin",
+      "skill_willpower": 4,
+      "skill_intellect": 3,
+      "skill_combat": 1,
+      "skill_agility": 4,
+      "health": 7,
+      "sanity": 7
+    },
+    {
+      "name": "Skids O'Toole",
+      "faction": "rogue",
+      "traits": "Criminal.",
+      "subname": "The Ex-Con",
+      "skill_willpower": 2,
+      "skill_intellect": 3,
+      "skill_combat": 3,
+      "skill_agility": 4,
+      "health": 8,
+      "sanity": 6
+    },
+    {
+      "name": "Agnes Baker",
+      "faction": "mystic",
+      "traits": "Sorcerer.",
+      "subname": "The Waitress",
+      "skill_willpower": 5,
+      "skill_intellect": 2,
+      "skill_combat": 2,
+      "skill_agility": 3,
+      "health": 6,
+      "sanity": 8
+    },
+    {
+      "name": "Daisy Walker",
+      "faction": "seeker",
+      "traits": "Agency. Detective.",
+      "subname": "The Fed",
+      "skill_willpower": 3,
+      "skill_intellect": 5,
+      "skill_combat": 2,
+      "skill_agility": 2,
+      "health": 5,
+      "sanity": 9
+    }
+  ]
+}
