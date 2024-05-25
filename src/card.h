@@ -1,6 +1,8 @@
 #pragma once
 
 #include "effect.h"
+#include "spdlog/spdlog.h"
+#include "string_to_enum.h"
 
 #include <algorithm>
 #include <array>
@@ -12,19 +14,39 @@
 #include <unordered_map>
 #include <vector>
 
+enum class Faction : uint8_t
+{
+  kGuardian = 0,
+  kSeeker,
+  kRogue,
+  kMystic,
+  kSurvivor,
+  kNeutral,
+  kInvalid
+};
+
+// SLOTS
+enum class Slot : uint8_t
+{
+  kAccesory,
+  kBody,
+  kAlly,
+  kHand,
+  kArcane,
+  kInvalid
+};
+struct Skill
+{
+  uint8_t willpower = 0;
+  uint8_t intellect = 0;
+  uint8_t combat = 0;
+  uint8_t agility = 0;
+  uint8_t wild = 0;
+};
+
 class Card
 {
 public:
-  enum class Faction : uint8_t
-  {
-    kGuardian = 0,
-    kSeeker,
-    kRogue,
-    kMystic,
-    kSurvivor,
-    kNeutral
-  };
-
   Card(const std::string& name, const Faction faction): mName{name}, mFaction{faction} {}
 
 protected:
@@ -35,12 +57,11 @@ protected:
 private:
 };
 
-static inline constexpr uint8_t kFactionNumber = 6;
-
-static inline const std::array<std::string, static_cast<size_t>(kFactionNumber)> kFactionNames =
-  {"guardian", "seeker", "rogue", "mystic", "survivor", "neutral"};
-
-Card::Faction StringToFaction(const std::string& faction);
+static inline bool operator==(const Skill& rhs, const Skill& lhs)
+{
+  return std::tie(rhs.willpower, rhs.intellect, rhs.combat, rhs.agility, rhs.wild)
+         == std::tie(lhs.willpower, lhs.intellect, lhs.combat, lhs.agility, lhs.wild);
+}
 
 class Investigator: public Card
 {
@@ -54,10 +75,7 @@ public:
                const uint8_t health,
                const uint8_t sanity):
     Card{name, faction},
-    mWillpower{willpower},
-    mIntellect{intellect},
-    mCombat{combat},
-    mAgility{agility},
+    mSkill{.willpower = willpower, .intellect = intellect, .combat = combat, .agility = agility},
     mHealth{health},
     mSanity{sanity}
   {}
@@ -68,35 +86,30 @@ public:
 
 private:
   Effect mElderSign;
-  uint8_t mWillpower;
-  uint8_t mIntellect;
-  uint8_t mCombat;
-  uint8_t mAgility;
+  Skill mSkill;
   uint8_t mHealth;
   uint8_t mSanity;
 };
 
 static inline bool operator==(const Investigator& rhs, const Investigator& lhs)
 {
-  return std::tie(rhs.mName,
-                  rhs.mFaction,
-                  rhs.mWillpower,
-                  rhs.mIntellect,
-                  rhs.mCombat,
-                  rhs.mAgility,
-                  rhs.mAgility,
-                  rhs.mHealth,
-                  rhs.mSanity)
-         == std::tie(lhs.mName,
-                     lhs.mFaction,
-                     lhs.mWillpower,
-                     lhs.mIntellect,
-                     lhs.mCombat,
-                     lhs.mAgility,
-                     lhs.mAgility,
-                     lhs.mHealth,
-                     lhs.mSanity);
+  return std::tie(rhs.mName, rhs.mFaction, rhs.mSkill, rhs.mHealth, rhs.mSanity)
+         == std::tie(lhs.mName, lhs.mFaction, rhs.mSkill, lhs.mHealth, lhs.mSanity);
 }
+
+class Asset: public Card
+{
+public:
+  Asset(const std::string& name, const Faction faction, const uint8_t cost, const Skill& skill):
+    Card{name, faction},
+    mCost{cost},
+    mSkill{skill}
+  {}
+
+private:
+  Skill mSkill;
+  uint8_t mCost;
+};
 
 class CardDB
 {
@@ -138,7 +151,7 @@ public:
 
     const auto& [_, dbData] = *it;
     auto investigator = std::make_shared<Investigator>(name,
-                                                       StringToFaction(dbData.faction),
+                                                       StringToEnum::Get<Faction>(dbData.faction),
                                                        dbData.skill_willpower,
                                                        dbData.skill_intellect,
                                                        dbData.skill_combat,

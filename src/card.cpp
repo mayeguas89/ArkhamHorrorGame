@@ -3,17 +3,6 @@
 #include "nlohmann/json.hpp"
 #include "spdlog/spdlog.h"
 
-Card::Faction StringToFaction(const std::string& faction)
-{
-  auto it = std::find(kFactionNames.begin(), kFactionNames.end(), faction);
-  if (it == kFactionNames.end())
-  {
-    throw std::runtime_error(fmt::format("Faction '{}' is not registered", faction));
-  }
-  auto d = std::distance(kFactionNames.begin(), it);
-  return static_cast<Card::Faction>(d);
-}
-
 void ReadInvestigatorsObject(const nlohmann::json& object,
                              std::unordered_map<std::string, CardDB::InvestigatorCardDBData>& investigators)
 {

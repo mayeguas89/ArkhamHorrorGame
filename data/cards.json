@@ -60,5 +60,31 @@
       "health": 5,
       "sanity": 9
     }
+  ],
+  "assets": [
+    {
+      "name": "Roland's .38 Special",
+      "faction": "neutral",
+      "traits": "Item. Weapon. Firearm.",
+      "cost": 3,
+      "skill": {
+        "combat": 1,
+        "agility": 1,
+        "wild": 1
+      },
+      "slot": "hand",
+      "uses": 4,
+      "activate": {
+        "expend": 1,
+        "action": "fight",
+        "skills": {
+          "combat": "+1/+3",
+          "optional": {
+            "location": "undiscovered_clues"
+          }
+        },
+        "damage": "+1"
+      }
+    }
   ]
 }

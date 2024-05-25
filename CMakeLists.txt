@@ -53,6 +53,7 @@ enable_testing()
 add_executable(
 	ArkhamHorror_Test 
 	"tests/test_card.cpp"
+	"tests/test_string_to_enum.cpp"
 )
 target_include_directories(
 	ArkhamHorror_Test 
@@ -66,5 +67,6 @@ target_link_libraries(
 	gtest_main 
 	gmock 
 	nlohmann_json::nlohmann_json
+  spdlog::spdlog
 )
 add_test(NAME ArkhamHorror_Test COMMAND ArkhamHorror_Test)
