@@ -5,6 +5,7 @@
 
 enum class Faction : uint8_t;
 enum class Slot : uint8_t;
+enum class LocationOptionalEffectCondition : uint8_t;
 
 class StringToEnum
 {
@@ -27,6 +28,14 @@ public:
     return Get<Faction, kFactionSize>(name, kFactionNames);
   }
 
+  template<>
+  static inline LocationOptionalEffectCondition Get(const std::string& name)
+  {
+    return Get<LocationOptionalEffectCondition, kLocationOptionalEffectConditionSize>(
+      name,
+      kLocationOptionalEffectConditionNames);
+  }
+
 private:
   static inline constexpr uint8_t kFactionSize = 6;
   static inline const std::array<std::string, static_cast<size_t>(kFactionSize)> kFactionNames =
@@ -37,6 +46,9 @@ private:
                                                                                             "ally",
                                                                                             "hand",
                                                                                             "arcane"};
+  static inline constexpr uint8_t kLocationOptionalEffectConditionSize = 1;
+  static inline const std::array<std::string, static_cast<size_t>(kLocationOptionalEffectConditionSize)>
+    kLocationOptionalEffectConditionNames = {"undiscovered_clues"};
 
   template<typename T>
   static inline std::string GetTypeName()
@@ -54,6 +66,12 @@ private:
   static inline std::string GetTypeName<Slot>()
   {
     return "Slot";
+  }
+
+  template<>
+  static inline std::string GetTypeName<LocationOptionalEffectCondition>()
+  {
+    return "LocationOptionalEffectCondition";
   }
 
   template<typename T, int Size>

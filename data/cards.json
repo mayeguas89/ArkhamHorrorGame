@@ -74,17 +74,67 @@
       },
       "slot": "hand",
       "uses": 4,
-      "activate": {
-        "expend": 1,
-        "action": "fight",
-        "skills": {
-          "combat": "+1/+3",
-          "optional": {
-            "location": "undiscovered_clues"
+      "activate": [
+        {
+          "expend": 1,
+          "action": "fight",
+          "skills": {
+            "combat": 1,
+            "optional": {
+              "combat": 3,
+              "location": "undiscovered_clues"
+            }
+          },
+          "effect": 1
+        }
+      ]
+    },
+    {
+      "name": ".45 Automatic",
+      "faction": "guardian",
+      "traits": "Item. Weapon. Firearm.",
+      "cost": 4,
+      "skill": {
+        "agility": 1
+      },
+      "slot": "hand",
+      "uses": 4,
+      "activate": [
+        {
+          "expend": 1,
+          "action": "fight",
+          "skills": {
+            "combat": 1
+          },
+          "effect": 1
+        }
+      ]
+    },
+    {
+      "name": "Physical Training",
+      "faction": "guardian",
+      "traits": "Talent.",
+      "cost": 2,
+      "skill": {
+        "willpower": 1,
+        "combat": 1
+      },
+      "trigger": [
+        {
+          "expend": 1,
+          "action": "skill_test",
+          "skills": {
+            "willpower": 1
           }
         },
-        "damage": "+1"
-      }
+        {
+          "expend": 1,
+          "action": "skill_test",
+          "skills": {
+            "combat": 1
+          }
+        }
+      ]
     }
   ]
 }
