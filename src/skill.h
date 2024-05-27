@@ -7,22 +7,22 @@ struct Skill
   Skill() = default;
   Skill& operator=(const Skill& other) = default;
   Skill(const Skill& other) = default;
-  Skill(const uint8_t pWillpower,
-        const uint8_t pIntellect,
-        const uint8_t pCombat,
-        const uint8_t pAgility,
-        const uint8_t pWild = 0):
+  Skill(const int8_t pWillpower,
+        const int8_t pIntellect,
+        const int8_t pCombat,
+        const int8_t pAgility,
+        const int8_t pWild = 0):
     willpower{pWillpower},
     intellect{pIntellect},
     combat{pCombat},
     agility{pAgility},
     wild{pWild}
   {}
-  uint8_t willpower = 0;
-  uint8_t intellect = 0;
-  uint8_t combat = 0;
-  uint8_t agility = 0;
-  uint8_t wild = 0;
+  int8_t willpower = 0;
+  int8_t intellect = 0;
+  int8_t combat = 0;
+  int8_t agility = 0;
+  int8_t wild = 0;
 };
 
 static inline bool operator==(const Skill& lhs, const Skill& rhs)

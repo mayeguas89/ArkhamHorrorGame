@@ -54,11 +54,13 @@ add_executable(
 	ArkhamHorror_Test 
 	"tests/test_card.cpp"
 	"tests/test_string_to_enum.cpp"
+	"tests/test_skill_test.cpp"
 )
 target_include_directories(
 	ArkhamHorror_Test 
 	PRIVATE 
 	${CMAKE_SOURCE_DIR}/src
+	${CMAKE_SOURCE_DIR}/tests/mock
 )
 target_link_libraries(
 	ArkhamHorror_Test 

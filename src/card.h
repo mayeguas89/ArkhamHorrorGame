@@ -47,6 +47,7 @@ class Card
 {
 public:
   Card(const std::string& name, const Faction faction): mName{name}, mFaction{faction} {}
+  virtual const Skill& GetSkill() const = 0;
 
 protected:
   std::string mName;
@@ -74,6 +75,21 @@ public:
   void RegisterElderSign(const std::shared_ptr<Effect>& effect)
   {
     mElderSign = std::move(effect);
+  }
+
+  const Skill& GetSkill() const override
+  {
+    return mSkill;
+  }
+
+  uint8_t GetHealth() const
+  {
+    return mHealth;
+  }
+
+  uint8_t GetSanity() const
+  {
+    return mSanity;
   }
 
   friend bool operator==(const Investigator& rhs, const Investigator& lhs);
@@ -107,6 +123,11 @@ public:
     mUses{uses}
   {}
   friend bool operator==(const Asset& rhs, const Asset& lhs);
+
+  const Skill& GetSkill() const override
+  {
+    return mSkill;
+  }
 
   void RegisterActivationEffect(const std::shared_ptr<Effect>& effect)
   {
