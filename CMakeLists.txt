@@ -53,6 +53,7 @@ enable_testing()
 add_executable(
 	ArkhamHorror_Test 
 	"tests/test_card.cpp"
+	"tests/test_deck.cpp"
 	"tests/test_string_to_enum.cpp"
 	"tests/test_skill_test.cpp"
 )

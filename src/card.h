@@ -237,6 +237,45 @@ inline void PrintTo(const Asset& asset, ::std::ostream* os)
   *os << fmt::format("{}", asset);
 }
 
+class Hability: public Card
+{
+public:
+  Hability(const std::string& name, const Faction faction, const Skill& skill): Card{name, faction}, mSkill{skill}
+  {}
+
+  virtual const Skill& GetSkill() const override
+  {
+    return mSkill;
+  }
+
+  friend bool operator==(const Hability& rhs, const Hability& lhs);
+
+private:
+  Skill mSkill;
+  friend struct fmt::formatter<Hability>;
+};
+
+static inline bool operator==(const Hability& rhs, const Hability& lhs)
+{
+  return std::tie(rhs.mName, rhs.mFaction, rhs.mSkill) == std::tie(lhs.mName, lhs.mFaction, lhs.mSkill);
+}
+
+template<>
+struct fmt::formatter<Hability>: fmt::formatter<std::string>
+{
+  auto format(const Hability& hability, format_context& ctx) const -> decltype(ctx.out())
+  {
+    auto it = fmt::format_to(ctx.out(), "'card': {{{}}}\n", static_cast<const Card&>(hability));
+    it = fmt::format_to(it, "{{'skill': {}}}", hability.mSkill);
+    return it;
+  }
+};
+
+inline void PrintTo(const Hability& hability, ::std::ostream* os)
+{
+  *os << fmt::format("{}", hability);
+}
+
 class CardDB
 {
 public:
