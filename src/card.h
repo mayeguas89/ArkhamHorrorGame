@@ -34,6 +34,7 @@ enum class Slot : uint8_t
   kAlly,
   kHand,
   kArcane,
+  kBothHands,
   kInvalid
 };
 
@@ -55,7 +56,25 @@ protected:
   Faction mFaction;
 
 private:
+  friend struct fmt::formatter<Card>;
 };
+template<>
+struct fmt::formatter<Card>: fmt::formatter<std::string>
+{
+  auto format(const Card& card, format_context& ctx) const -> decltype(ctx.out())
+  {
+    return fmt::format_to(ctx.out(),
+                          "'name': {}, 'traits': {}, 'faction': {}",
+                          card.mName,
+                          card.mTraits,
+                          StringToEnum::GetString<Faction>(card.mFaction));
+  }
+};
+
+inline void PrintTo(const Card& card, ::std::ostream* os)
+{
+  *os << fmt::format("{}", card);
+}
 
 class Investigator: public Card
 {
@@ -92,19 +111,38 @@ public:
     return mSanity;
   }
 
-  friend bool operator==(const Investigator& rhs, const Investigator& lhs);
-
 private:
   std::shared_ptr<Effect> mElderSign;
   Skill mSkill;
   uint8_t mHealth;
   uint8_t mSanity;
+
+  friend struct fmt::formatter<Investigator>;
+  friend bool operator==(const Investigator& rhs, const Investigator& lhs);
 };
 
 static inline bool operator==(const Investigator& rhs, const Investigator& lhs)
 {
   return std::tie(rhs.mName, rhs.mFaction, rhs.mSkill, rhs.mHealth, rhs.mSanity)
          == std::tie(lhs.mName, lhs.mFaction, lhs.mSkill, lhs.mHealth, lhs.mSanity);
+}
+template<>
+struct fmt::formatter<Investigator>: fmt::formatter<std::string>
+{
+  auto format(const Investigator& investigator, format_context& ctx) const -> decltype(ctx.out())
+  {
+    auto it = fmt::format_to(ctx.out(), "'card': {{{}}}\n", static_cast<const Card&>(investigator));
+    return fmt::format_to(it,
+                          "{{'skill': {}, 'health': {}, 'sanity': {}}}",
+                          investigator.mSkill,
+                          investigator.mHealth,
+                          investigator.mSanity);
+  }
+};
+
+inline void PrintTo(const Investigator& investigator, ::std::ostream* os)
+{
+  *os << fmt::format("{}", investigator);
 }
 
 class Asset: public Card
@@ -157,6 +195,8 @@ private:
 
   std::vector<std::shared_ptr<Effect>> mActivationEffects;
   std::vector<std::shared_ptr<Effect>> mTriggerEffects;
+
+  friend struct fmt::formatter<Asset>;
 };
 
 static inline bool operator==(const Asset& rhs, const Asset& lhs)
@@ -166,6 +206,37 @@ static inline bool operator==(const Asset& rhs, const Asset& lhs)
          && CompareVectorOfSharedPtr(lhs.mActivationEffects, rhs.mActivationEffects)
          && CompareVectorOfSharedPtr(lhs.mTriggerEffects, rhs.mTriggerEffects);
 }
+
+template<>
+struct fmt::formatter<Asset>: fmt::formatter<std::string>
+{
+  auto format(const Asset& asset, format_context& ctx) const -> decltype(ctx.out())
+  {
+    auto it = fmt::format_to(ctx.out(), "'card': {{{}}}\n", static_cast<const Card&>(asset));
+    it = fmt::format_to(it,
+                        "{{'skill': {}, 'cost': {}, 'slot': {}, 'uses': {}, ",
+                        asset.mSkill,
+                        asset.mCost,
+                        StringToEnum::GetString<Slot>(asset.mSlot),
+                        asset.mUses.value_or(0));
+    it = fmt::format_to(it, "{{'activationEffects':[");
+    std::for_each(asset.mActivationEffects.begin(),
+                  asset.mActivationEffects.end(),
+                  [&it](const auto& effect) { it = fmt::format_to(it, "{{{}}}, ", *effect); });
+    it = fmt::format_to(it, "]}}, {{'triggerEffects':[");
+    std::for_each(asset.mTriggerEffects.begin(),
+                  asset.mTriggerEffects.end(),
+                  [&it](const auto& effect) { it = fmt::format_to(it, "{{{}}}, ", *effect); });
+    it = fmt::format_to(it, "]}}");
+    return it;
+  }
+};
+
+inline void PrintTo(const Asset& asset, ::std::ostream* os)
+{
+  *os << fmt::format("{}", asset);
+}
+
 class CardDB
 {
 public:
@@ -206,7 +277,7 @@ public:
     };
     SkillEffectsDBData skill_effect;
     // Efecto extra sobre la accion: para la lucha puede ser +1 de daño
-    uint8_t effect{0};
+    std::unordered_map<std::string, int8_t> modifications;
   };
 
   struct AssetCardDBData: public CardDBData
@@ -276,10 +347,10 @@ public:
               && action.skill_effect.optional_effect->what == "location")
           {
             Skill optionalSkill = action.skill_effect.optional_effect->skill;
-            std::shared_ptr<Effect> effect = std::make_shared<LocationOptionalFightEffect>(
+            std::shared_ptr<Effect> effect = std::make_shared<LocationOptionalFightEffectWithAdditionalDamage>(
               mainSkill,
               action.expend.value_or(0),
-              action.effect,
+              action.modifications.find("damage")->second,
               LocationOptionalEffect{mainSkill,
                                      action.expend.value_or(0),
                                      optionalSkill,
@@ -291,7 +362,9 @@ public:
           else
           {
             std::shared_ptr<Effect> effect =
-              std::make_shared<FightEffect>(mainSkill, action.expend.value_or(0), action.effect);
+              std::make_shared<FightEffectWithAdditionalDamage>(mainSkill,
+                                                                action.expend.value_or(0),
+                                                                action.modifications.find("damage")->second);
             register_function(effect);
           }
         }
@@ -299,6 +372,16 @@ public:
         {
           auto effect = std::make_shared<Effect>(mainSkill, action.expend.value_or(0));
           register_function(effect);
+        }
+        else if (action.action == "investigate")
+        {
+          if (auto it = action.modifications.find("shroud"); it != action.modifications.end())
+          {
+            auto effect = std::make_shared<InvestigateEffectWithShroudModification>(mainSkill,
+                                                                                    action.expend.value_or(0),
+                                                                                    it->second);
+            register_function(effect);
+          }
         }
       }
     };

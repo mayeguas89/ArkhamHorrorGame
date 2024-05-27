@@ -50,7 +50,7 @@ TEST(CardFactory, CheckExistingAssetCard_Rolands38Special)
   activationOpionalEffectSkill.combat = 3;
 
   Asset expectedCard{"Roland's .38 Special", Faction::kNeutral, cost, cardSkill, Slot::kHand, uses};
-  std::shared_ptr<Effect> activationEffect = std::make_shared<LocationOptionalFightEffect>(
+  std::shared_ptr<Effect> activationEffect = std::make_shared<LocationOptionalFightEffectWithAdditionalDamage>(
     activationEffectSkill,
     activationCost,
     additionalDamage,
@@ -78,7 +78,7 @@ TEST(CardFactory, CheckExistingAssetCard_45Automatic)
 
   Asset expectedCard{".45 Automatic", Faction::kGuardian, cost, cardSkill, Slot::kHand, uses};
   std::shared_ptr<Effect> activationEffect =
-    std::make_shared<FightEffect>(activationEffectSkill, activationCost, additionalDamage);
+    std::make_shared<FightEffectWithAdditionalDamage>(activationEffectSkill, activationCost, additionalDamage);
   expectedCard.RegisterActivationEffect(activationEffect);
   EXPECT_EQ(*card, expectedCard);
 }
@@ -105,5 +105,22 @@ TEST(CardFactory, CheckExistingAssetCard_PhysicalTraining)
   auto triggerEffectCombat = std::make_shared<Effect>(triggerEffectSkillCombat, activationCost);
   expectedCard.RegisterTriggerEffect(triggerEffectWillpower);
   expectedCard.RegisterTriggerEffect(triggerEffectCombat);
+  EXPECT_EQ(*card, expectedCard);
+}
+
+TEST(CardFactory, CheckExistingAssetCard_Flashlight)
+{
+  auto card = CardFactory::CreateCard<Asset>("Flashlight");
+
+  uint8_t cost = 2;
+  uint8_t uses = 3;
+  uint8_t activationCost = 1;
+  Skill cardSkill;
+  cardSkill.intellect = 1;
+
+  Asset expectedCard{"Flashlight", Faction::kNeutral, cost, cardSkill, Slot::kHand, uses};
+  std::shared_ptr<Effect> activationEffect =
+    std::make_shared<InvestigateEffectWithShroudModification>(Skill{}, activationCost, -2);
+  expectedCard.RegisterActivationEffect(activationEffect);
   EXPECT_EQ(*card, expectedCard);
 }

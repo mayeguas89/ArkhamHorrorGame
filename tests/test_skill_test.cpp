@@ -53,3 +53,45 @@ TEST_F(Test_SkillTestWillpower, WillpowerTestFails)
   EXPECT_FALSE(succeed);
   EXPECT_EQ(difference, playerSkill.willpower - skillTested.willpower + chaosToken.effect);
 }
+
+TEST_F(Test_SkillTestWillpower, WillpowerTestSucceedWithWillpowerCommitedCards)
+{
+  ChaosToken chaosToken{ChaosToken::Token::kValue, -2};
+  std::shared_ptr<Card> asset =
+    std::make_shared<Asset>("InventedCard", Faction::kInvalid, 0, Skill{1, 0, 0, 0}, Slot::kInvalid);
+  EXPECT_CALL(mockChaosBag, GetToken()).WillOnce(Return(chaosToken));
+  EXPECT_CALL(mockPlayer, GetSkill()).WillOnce(ReturnRef(playerSkill));
+  auto [succeed, difference] = skillTest(skillTested, mockPlayer, mockChaosBag, {asset});
+  EXPECT_TRUE(succeed);
+  EXPECT_EQ(difference,
+            playerSkill.willpower - skillTested.willpower + chaosToken.effect
+              + Willpower::GetSkillValue(asset->GetSkill()));
+}
+
+TEST_F(Test_SkillTestWillpower, WillpowerTestSucceedWithWildCommitedCards)
+{
+  ChaosToken chaosToken{ChaosToken::Token::kValue, -2};
+  std::shared_ptr<Card> asset =
+    std::make_shared<Asset>("InventedCard", Faction::kInvalid, 0, Skill{0, 0, 0, 0, 1}, Slot::kInvalid);
+  EXPECT_CALL(mockChaosBag, GetToken()).WillOnce(Return(chaosToken));
+  EXPECT_CALL(mockPlayer, GetSkill()).WillOnce(ReturnRef(playerSkill));
+  auto [succeed, difference] = skillTest(skillTested, mockPlayer, mockChaosBag, {asset});
+  EXPECT_TRUE(succeed);
+  EXPECT_EQ(difference,
+            playerSkill.willpower - skillTested.willpower + chaosToken.effect
+              + Willpower::GetSkillValue(asset->GetSkill()));
+}
+
+TEST_F(Test_SkillTestWillpower, WillpowerTestFailsWithCommitedCardsFromOtherSkills)
+{
+  ChaosToken chaosToken{ChaosToken::Token::kValue, -2};
+  std::shared_ptr<Card> asset =
+    std::make_shared<Asset>("InventedCard", Faction::kInvalid, 0, Skill{0, 1, 0, 0}, Slot::kInvalid);
+  EXPECT_CALL(mockChaosBag, GetToken()).WillOnce(Return(chaosToken));
+  EXPECT_CALL(mockPlayer, GetSkill()).WillOnce(ReturnRef(playerSkill));
+  auto [succeed, difference] = skillTest(skillTested, mockPlayer, mockChaosBag, {asset});
+  EXPECT_FALSE(succeed);
+  EXPECT_EQ(difference,
+            playerSkill.willpower - skillTested.willpower + chaosToken.effect
+              + Willpower::GetSkillValue(asset->GetSkill()));
+}

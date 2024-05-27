@@ -6,7 +6,12 @@
 enum class Faction : uint8_t;
 enum class Slot : uint8_t;
 enum class LocationOptionalEffectCondition : uint8_t;
-
+enum class EffectModifications
+{
+  kDamage,
+  kShroud,
+  kInvalid
+};
 class StringToEnum
 {
 public:
@@ -16,10 +21,22 @@ public:
     return T::kInvalid;
   }
 
+  template<typename T>
+  static inline std::string GetString(const T value)
+  {
+    return "invalid";
+  }
+
   template<>
   static inline Slot Get(const std::string& name)
   {
     return Get<Slot, kSlotSize>(name, kSlotNames);
+  }
+
+  template<>
+  static inline std::string GetString(const Slot value)
+  {
+    return GetString<Slot, kSlotSize>(value, kSlotNames);
   }
 
   template<>
@@ -29,10 +46,24 @@ public:
   }
 
   template<>
+  static inline std::string GetString(const Faction value)
+  {
+    return GetString<Faction, kFactionSize>(value, kFactionNames);
+  }
+
+  template<>
   static inline LocationOptionalEffectCondition Get(const std::string& name)
   {
     return Get<LocationOptionalEffectCondition, kLocationOptionalEffectConditionSize>(
       name,
+      kLocationOptionalEffectConditionNames);
+  }
+
+  template<>
+  static inline std::string GetString(const LocationOptionalEffectCondition value)
+  {
+    return GetString<LocationOptionalEffectCondition, kLocationOptionalEffectConditionSize>(
+      value,
       kLocationOptionalEffectConditionNames);
   }
 
@@ -84,5 +115,12 @@ private:
     }
     auto d = std::distance(nameList.begin(), it);
     return static_cast<T>(d);
+  }
+
+  template<typename T, int Size>
+  static inline std::string GetString(const T value, const std::array<std::string, Size>& nameList)
+  {
+    size_t idx = static_cast<typename std::underlying_type<T>::type>(value);
+    return nameList.at(idx);
   }
 };

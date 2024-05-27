@@ -81,8 +81,16 @@ void ReadActionDBData(const nlohmann::json& elements, std::vector<CardDB::Action
         activate_action.skill_effect.optional_effect = optional_effect;
       }
     }
-    if (auto activate_it = activate_element.find("effect"); activate_it != activate_element.end())
-      activate_action.effect = activate_it.value();
+
+    if (auto activate_it = activate_element.find("modifications"); activate_it != activate_element.end())
+    {
+      const auto effect_array = activate_it.value();
+      for (const auto& effect_element: effect_array)
+      {
+        for (const auto [key, value]: effect_element.items())
+          activate_action.modifications.insert({key, value});
+      }
+    }
 
     actions.push_back(activate_action);
   }

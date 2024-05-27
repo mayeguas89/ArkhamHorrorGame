@@ -85,7 +85,11 @@
               "location": "undiscovered_clues"
             }
           },
-          "effect": 1
+          "modifications": [
+            {
+              "damage": 1
+            }
+          ]
         }
       ]
     },
@@ -106,7 +110,11 @@
           "skills": {
             "combat": 1
           },
-          "effect": 1
+          "modifications": [
+            {
+              "damage": 1
+            }
+          ]
         }
       ]
     },
@@ -133,6 +141,28 @@
           "skills": {
             "combat": 1
           }
+        }
+      ]
+    },
+    {
+      "name": "Flashlight",
+      "faction": "neutral",
+      "traits": "Item. Tool.",
+      "cost": 2,
+      "skill": {
+        "intellect": 1
+      },
+      "slot": "hand",
+      "uses": 3,
+      "activate": [
+        {
+          "expend": 1,
+          "action": "investigate",
+          "modifications": [
+            {
+              "shroud": -2
+            }
+          ]
         }
       ]
     }

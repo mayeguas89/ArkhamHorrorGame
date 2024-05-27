@@ -1,7 +1,10 @@
 #pragma once
 
+#include "spdlog/spdlog.h"
+
 #include <cstdint>
 #include <tuple>
+
 struct Skill
 {
   Skill() = default;
@@ -30,3 +33,50 @@ static inline bool operator==(const Skill& lhs, const Skill& rhs)
   return std::tie(lhs.willpower, lhs.intellect, lhs.combat, lhs.agility, lhs.wild)
          == std::tie(rhs.willpower, rhs.intellect, rhs.combat, rhs.agility, rhs.wild);
 }
+
+template<>
+struct fmt::formatter<Skill>: fmt::formatter<std::string>
+{
+  auto format(const Skill& skill, format_context& ctx) const -> decltype(ctx.out())
+  {
+    return fmt::format_to(ctx.out(),
+                          "{{'agility' {}, 'combat': {}, 'intellect': {}, 'willpower': {}, 'wild': {}}}",
+                          skill.agility,
+                          skill.combat,
+                          skill.intellect,
+                          skill.willpower,
+                          skill.wild);
+  }
+};
+
+struct Willpower
+{
+  static inline int8_t GetSkillValue(const Skill& skill)
+  {
+    return skill.willpower + skill.wild;
+  };
+};
+
+struct Combat
+{
+  static inline int8_t GetSkillValue(const Skill& skill)
+  {
+    return skill.combat + skill.wild;
+  };
+};
+
+struct Intellect
+{
+  static inline int8_t GetSkillValue(const Skill& skill)
+  {
+    return skill.intellect + skill.wild;
+  };
+};
+
+struct Agility
+{
+  static inline int8_t GetSkillValue(const Skill& skill)
+  {
+    return skill.agility + skill.wild;
+  };
+};

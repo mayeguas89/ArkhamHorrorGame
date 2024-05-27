@@ -1,6 +1,7 @@
 #pragma once
 
 #include "skill.h"
+#include "spdlog/spdlog.h"
 
 #include <tuple>
 
@@ -17,11 +18,11 @@ public:
     return mSkill;
   }
 
-  friend bool operator==(const Effect& rhs, const Effect& lhs);
-
 protected:
   Skill mSkill; // Skill which the effect changes
   uint8_t mActivationCost{0};
+  friend bool operator==(const Effect& rhs, const Effect& lhs);
+  friend struct fmt::formatter<Effect>;
 };
 
 static inline bool operator==(const Effect& lhs, const Effect& rhs)
@@ -29,12 +30,31 @@ static inline bool operator==(const Effect& lhs, const Effect& rhs)
   return std::tie(lhs.mSkill, lhs.mActivationCost) == std::tie(rhs.mSkill, rhs.mActivationCost);
 }
 
+template<>
+struct fmt::formatter<Effect>: fmt::formatter<std::string>
+{
+  auto format(const Effect& effect, format_context& ctx) const -> decltype(ctx.out())
+  {
+    return fmt::format_to(ctx.out(),
+                          "{{'skill' {}, 'activationCost': {}}}",
+                          effect.mSkill,
+                          effect.mActivationCost);
+  }
+};
+
+inline void PrintTo(const Effect& effect, std::ostream* os)
+{
+  *os << fmt::format("{}", effect);
+}
+
 // Base class for FightEffect
-class FightEffect: public Effect
+class FightEffectWithAdditionalDamage: public Effect
 {
 public:
-  FightEffect() noexcept = default;
-  FightEffect(const Skill& skill, const uint8_t activationCost, const uint8_t additionalDamage):
+  FightEffectWithAdditionalDamage() noexcept = default;
+  FightEffectWithAdditionalDamage(const Skill& skill,
+                                  const uint8_t activationCost,
+                                  const uint8_t additionalDamage):
     Effect{skill, activationCost},
     mAdditionalDamage{additionalDamage}
   {}
@@ -43,16 +63,46 @@ public:
   {
     return mAdditionalDamage;
   }
-  friend bool operator==(const FightEffect& rhs, const FightEffect& lhs);
+  friend bool operator==(const FightEffectWithAdditionalDamage& rhs, const FightEffectWithAdditionalDamage& lhs);
 
 protected:
   uint8_t mAdditionalDamage{0};
 };
 
-static inline bool operator==(const FightEffect& lhs, const FightEffect& rhs)
+static inline bool operator==(const FightEffectWithAdditionalDamage& lhs,
+                              const FightEffectWithAdditionalDamage& rhs)
 {
   return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mAdditionalDamage)
          == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mAdditionalDamage);
+}
+// Base class for InvestigateEffectWithShroudModification
+class InvestigateEffectWithShroudModification: public Effect
+{
+public:
+  InvestigateEffectWithShroudModification() noexcept = default;
+  InvestigateEffectWithShroudModification(const Skill& skill,
+                                          const uint8_t activationCost,
+                                          const int8_t shroudModification):
+    Effect{skill, activationCost},
+    mShroudModification{shroudModification}
+  {}
+
+  int8_t GetShroudModification() const
+  {
+    return mShroudModification;
+  }
+  friend bool operator==(const InvestigateEffectWithShroudModification& rhs,
+                         const InvestigateEffectWithShroudModification& lhs);
+
+protected:
+  int8_t mShroudModification{0};
+};
+
+static inline bool operator==(const InvestigateEffectWithShroudModification& lhs,
+                              const InvestigateEffectWithShroudModification& rhs)
+{
+  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mShroudModification)
+         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mShroudModification);
 }
 
 // Base class for OptionalEffect
@@ -116,14 +166,14 @@ static inline bool operator==(const LocationOptionalEffect& lhs, const LocationO
   return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mOptionalSkill, lhs.mCondition)
          == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mOptionalSkill, rhs.mCondition);
 }
-class LocationOptionalFightEffect: public FightEffect
+class LocationOptionalFightEffectWithAdditionalDamage: public FightEffectWithAdditionalDamage
 {
 public:
-  LocationOptionalFightEffect(const Skill& skill,
-                              const uint8_t activationCost,
-                              const uint8_t additionalDamage,
-                              const LocationOptionalEffect& locationOptionalEffect):
-    FightEffect{skill, activationCost, additionalDamage},
+  LocationOptionalFightEffectWithAdditionalDamage(const Skill& skill,
+                                                  const uint8_t activationCost,
+                                                  const uint8_t additionalDamage,
+                                                  const LocationOptionalEffect& locationOptionalEffect):
+    FightEffectWithAdditionalDamage{skill, activationCost, additionalDamage},
     mLocationOptionalEffect{locationOptionalEffect}
   {}
 
@@ -131,13 +181,15 @@ public:
   {
     return mLocationOptionalEffect;
   }
-  friend bool operator==(const LocationOptionalFightEffect& rhs, const LocationOptionalFightEffect& lhs);
+  friend bool operator==(const LocationOptionalFightEffectWithAdditionalDamage& rhs,
+                         const LocationOptionalFightEffectWithAdditionalDamage& lhs);
 
 private:
   LocationOptionalEffect mLocationOptionalEffect;
 };
-static inline bool operator==(const LocationOptionalFightEffect& lhs, const LocationOptionalFightEffect& rhs)
+static inline bool operator==(const LocationOptionalFightEffectWithAdditionalDamage& lhs,
+                              const LocationOptionalFightEffectWithAdditionalDamage& rhs)
 {
-  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mLocationOptionalEffect)
-         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mLocationOptionalEffect);
+  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mAdditionalDamage, lhs.mLocationOptionalEffect)
+         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mAdditionalDamage, rhs.mLocationOptionalEffect);
 }
