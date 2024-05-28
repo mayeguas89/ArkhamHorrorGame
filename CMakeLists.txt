@@ -24,7 +24,7 @@ add_subdirectory(external)
 add_library(
   ArkhamHorror_Lib
   OBJECT
-  src/card.cpp
+  src/card_db.cpp
 )
 target_include_directories(
 	ArkhamHorror_Lib 

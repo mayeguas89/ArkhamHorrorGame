@@ -1,7 +1,7 @@
 #include "deck.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
+#include "skill_card.h"
 using namespace ::testing;
 
 template<typename T>
@@ -25,7 +25,7 @@ struct Test_BasicDeck: Test
 
 TEST_F(Test_BasicDeck, AddCard)
 {
-  deck.AddCard(std::make_shared<Hability>("CardId0", Faction::kInvalid, Skill{}));
+  deck.AddCard(std::make_shared<SkillCard>("CardId0", Faction::kInvalid, Skill{}));
   ASSERT_FALSE(deck.Empty());
   ASSERT_EQ(deck.Size(), 1);
 }
@@ -34,13 +34,14 @@ struct Test_DrawDeck: Test_BasicDeck
 {
   Test_DrawDeck()
   {
-    deck.AddCard(std::make_shared<Hability>("CardId0", Faction::kInvalid, Skill{}));
+    deck.AddCard(std::make_shared<SkillCard>("CardId0", Faction::kInvalid, Skill{}));
   }
 };
 
 TEST_F(Test_DrawDeck, DrawCard)
 {
   auto card = deck.DrawCard();
-  auto expectedCard = std::make_shared<Hability>("CardId0", Faction::kInvalid, Skill{});
-  ASSERT_TRUE(CompareCard<Hability>(card, expectedCard));
+  auto expectedCard = std::make_shared<SkillCard>("CardId0", Faction::kInvalid, Skill{});
+  ASSERT_TRUE(CompareCard<SkillCard>(card, expectedCard));
 }
+

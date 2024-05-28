@@ -1,4 +1,4 @@
-#include "card.h"
+#include "card_db.h"
 
 #include "nlohmann/json.hpp"
 #include "spdlog/spdlog.h"
@@ -88,8 +88,18 @@ void ReadActionDBData(const nlohmann::json& elements, std::vector<CardDB::Action
       for (const auto& effect_element: effect_array)
       {
         for (const auto [key, value]: effect_element.items())
-          activate_action.modifications.insert({key, value});
+        {
+          if (key == "condition")
+            activate_action.modifications.insert({key, static_cast<std::string>(value)});
+          else
+            activate_action.modifications.insert({key, static_cast<int8_t>(value)});
+        }
       }
+    }
+
+    if (auto action_it = activate_element.find("target"); action_it != activate_element.end())
+    {
+      activate_action.target = action_it.value();
     }
 
     actions.push_back(activate_action);
@@ -106,20 +116,34 @@ void ReadAssetObject(const nlohmann::json& object,
     asset.faction = element.at("faction");
     asset.traits = element.at("traits");
     asset.cost = element.at("cost");
-    asset.skill = ReadSkillObject(element.at("skill"));
+    asset.skill = ReadSkillObject(element.at("test_skill"));
     if (auto it = element.find("slot"); it != element.end())
       asset.slot = element.at("slot");
     if (auto it = element.find("uses"); it != element.end())
       asset.uses = element.at("uses");
+    if (auto it = element.find("health"); it != element.end())
+      asset.health = element.at("health");
+    if (auto it = element.find("sanity"); it != element.end())
+      asset.sanity = element.at("sanity");
 
     if (const auto it = element.find("activate"); it != element.end())
     {
-      ReadActionDBData(it.value(), asset.activate_actions);
+      ReadActionDBData(it.value(), asset.effects.at(EffectType::kActivate));
     }
 
     if (const auto it = element.find("trigger"); it != element.end())
     {
-      ReadActionDBData(it.value(), asset.trigger_actions);
+      ReadActionDBData(it.value(), asset.effects.at(EffectType::kTrigger));
+    }
+
+    if (const auto it = element.find("discard"); it != element.end())
+    {
+      ReadActionDBData(it.value(), asset.effects.at(EffectType::kDiscard));
+    }
+
+    if (const auto it = element.find("pasive"); it != element.end())
+    {
+      ReadActionDBData(it.value(), asset.effects.at(EffectType::kPasive));
     }
 
     assets.insert({asset.name, asset});

@@ -1,9 +1,19 @@
 #pragma once
 
+#include "condition.h"
 #include "skill.h"
 #include "spdlog/spdlog.h"
 
 #include <tuple>
+
+enum class EffectType
+{
+  kActivate,
+  kTrigger,
+  kPasive,
+  kDiscard,
+  kInvalid
+};
 
 // Base class for all Effects
 class Effect
@@ -45,6 +55,27 @@ struct fmt::formatter<Effect>: fmt::formatter<std::string>
 inline void PrintTo(const Effect& effect, std::ostream* os)
 {
   *os << fmt::format("{}", effect);
+}
+
+// Base class for all Effects
+class EffectWithCondition: public Effect
+{
+public:
+  EffectWithCondition() noexcept = default;
+  EffectWithCondition(const Skill& skill, const uint8_t activationCost, std::shared_ptr<Condition> condition):
+    Effect{skill, activationCost},
+    mCondition{condition}
+  {}
+
+protected:
+  std::shared_ptr<Condition> mCondition;
+  friend bool operator==(const EffectWithCondition& rhs, const EffectWithCondition& lhs);
+};
+
+static inline bool operator==(const EffectWithCondition& lhs, const EffectWithCondition& rhs)
+{
+  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mCondition)
+         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mCondition);
 }
 
 // Base class for FightEffect
@@ -187,9 +218,88 @@ public:
 private:
   LocationOptionalEffect mLocationOptionalEffect;
 };
+
 static inline bool operator==(const LocationOptionalFightEffectWithAdditionalDamage& lhs,
                               const LocationOptionalFightEffectWithAdditionalDamage& rhs)
 {
   return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mAdditionalDamage, lhs.mLocationOptionalEffect)
          == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mAdditionalDamage, rhs.mLocationOptionalEffect);
+}
+
+class MakeDamageAtTargetAtCurrentLocation: public Effect
+{
+public:
+  MakeDamageAtTargetAtCurrentLocation(const Skill& skill, const uint8_t activationCost, uint8_t amount):
+    Effect{skill, activationCost},
+    mAmount{amount}
+  {}
+
+  uint8_t GetDamage() const
+  {
+    return mAmount;
+  }
+
+  friend bool operator==(const MakeDamageAtTargetAtCurrentLocation& rhs,
+                         const MakeDamageAtTargetAtCurrentLocation& lhs);
+
+private:
+  uint8_t mAmount;
+};
+
+static inline bool operator==(const MakeDamageAtTargetAtCurrentLocation& lhs,
+                              const MakeDamageAtTargetAtCurrentLocation& rhs)
+{
+  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mAmount)
+         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mAmount);
+}
+
+class FightEffectWithAdditionalDamageWithCondition: public FightEffectWithAdditionalDamage
+{
+public:
+  FightEffectWithAdditionalDamageWithCondition() noexcept = default;
+  FightEffectWithAdditionalDamageWithCondition(const Skill& skill,
+                                               const uint8_t activationCost,
+                                               const uint8_t additionalDamage,
+                                               const std::shared_ptr<Condition> condition):
+    FightEffectWithAdditionalDamage{skill, activationCost, additionalDamage},
+    mCondition{condition}
+  {}
+
+  friend bool operator==(const FightEffectWithAdditionalDamageWithCondition& rhs,
+                         const FightEffectWithAdditionalDamageWithCondition& lhs);
+
+protected:
+  std::shared_ptr<Condition> mCondition;
+};
+
+static inline bool operator==(const FightEffectWithAdditionalDamageWithCondition& lhs,
+                              const FightEffectWithAdditionalDamageWithCondition& rhs)
+{
+  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mAdditionalDamage)
+         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mAdditionalDamage);
+}
+
+class MakeDamageToAttacker: public Effect
+{
+public:
+  MakeDamageToAttacker(const Skill& skill, const uint8_t activationCost, uint8_t amount):
+    Effect{skill, activationCost},
+    mAmount{amount}
+  {}
+
+  uint8_t GetDamage() const
+  {
+    return mAmount;
+  }
+
+  friend bool operator==(const MakeDamageToAttacker& rhs, const MakeDamageToAttacker& lhs);
+
+private:
+  uint8_t mAmount;
+};
+
+static inline bool operator==(const MakeDamageToAttacker& lhs, const MakeDamageToAttacker& rhs)
+{
+  return std::tie(lhs.mSkill, lhs.mActivationCost, lhs.mAmount)
+         == std::tie(rhs.mSkill, rhs.mActivationCost, rhs.mAmount);
 }

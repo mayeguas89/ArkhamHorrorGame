@@ -67,7 +67,7 @@
       "faction": "neutral",
       "traits": "Item. Weapon. Firearm.",
       "cost": 3,
-      "skill": {
+      "test_skill": {
         "combat": 1,
         "agility": 1,
         "wild": 1
@@ -98,7 +98,7 @@
       "faction": "guardian",
       "traits": "Item. Weapon. Firearm.",
       "cost": 4,
-      "skill": {
+      "test_skill": {
         "agility": 1
       },
       "slot": "hand",
@@ -123,7 +123,7 @@
       "faction": "guardian",
       "traits": "Talent.",
       "cost": 2,
-      "skill": {
+      "test_skill": {
         "willpower": 1,
         "combat": 1
       },
@@ -149,7 +149,7 @@
       "faction": "neutral",
       "traits": "Item. Tool.",
       "cost": 2,
-      "skill": {
+      "test_skill": {
         "intellect": 1
       },
       "slot": "hand",
@@ -163,6 +163,84 @@
               "shroud": -2
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Beat Cop",
+      "faction": "guardian",
+      "traits": "Ally. Police.",
+      "cost": 4,
+      "test_skill": {
+        "combat": 1
+      },
+      "slot": "ally",
+      "health": 2,
+      "sanity": 2,
+      "pasive": [
+        {
+          "action": "skill_test",
+          "skills": {
+            "combat": 1
+          }
+        }
+      ],
+      "discard": [
+        {
+          "action": "make_damage",
+          "modifications": [
+            {
+              "damage": 1
+            }
+          ],
+          "target": "enemy at current location"
+        }
+      ]
+    },
+    {
+      "name": "Machete",
+      "faction": "guardian",
+      "traits": "Item. Weapon. Melee.",
+      "cost": 3,
+      "test_skill": {
+        "combat": 1
+      },
+      "slot": "hand",
+      "pasive": [
+        {
+          "action": "fight",
+          "skills": {
+            "combat": 1
+          },
+          "modifications": [
+            {
+              "damage": 1,
+              "condition": "only_enemy_engaged"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Guard Dog",
+      "faction": "guardian",
+      "traits": "Ally. Police.",
+      "cost": 3,
+      "test_skill": {
+        "combat": 1
+      },
+      "slot": "ally",
+      "health": 3,
+      "sanity": 1,
+      "trigger": [
+        {
+          "action": "recive_damage",
+          "modifications": [
+            {
+              "damage": 1
+            }
+          ],
+          "target": "attacking_enemy"
         }
       ]
     }

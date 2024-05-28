@@ -1,6 +1,6 @@
 #pragma once
 
-#include "card.h"
+#include "card_factory.h"
 #include "deck.h"
 #include "skill.h"
 
@@ -49,7 +49,7 @@ public:
   }
 
 private:
-  std::shared_ptr<Card> mInvestigator;
+  std::shared_ptr<Investigator> mInvestigator;
   DeckImpl<std::vector<std::shared_ptr<Card>>> mHand;
   DeckImpl<std::queue<std::shared_ptr<Card>>> mDeck;
   uint8_t mDamagePool{0};

@@ -58,7 +58,7 @@ TEST_F(Test_SkillTestWillpower, WillpowerTestSucceedWithWillpowerCommitedCards)
 {
   ChaosToken chaosToken{ChaosToken::Token::kValue, -2};
   std::shared_ptr<Card> asset =
-    std::make_shared<Asset>("InventedCard", Faction::kInvalid, 0, Skill{1, 0, 0, 0}, Slot::kInvalid);
+    std::make_shared<Asset>("InventedCard", Faction::kInvalid, Skill{1, 0, 0, 0}, 0, Slot::kInvalid);
   EXPECT_CALL(mockChaosBag, GetToken()).WillOnce(Return(chaosToken));
   EXPECT_CALL(mockPlayer, GetSkill()).WillOnce(ReturnRef(playerSkill));
   auto [succeed, difference] = skillTest(skillTested, mockPlayer, mockChaosBag, {asset});
@@ -72,7 +72,7 @@ TEST_F(Test_SkillTestWillpower, WillpowerTestSucceedWithWildCommitedCards)
 {
   ChaosToken chaosToken{ChaosToken::Token::kValue, -2};
   std::shared_ptr<Card> asset =
-    std::make_shared<Asset>("InventedCard", Faction::kInvalid, 0, Skill{0, 0, 0, 0, 1}, Slot::kInvalid);
+    std::make_shared<Asset>("InventedCard", Faction::kInvalid, Skill{0, 0, 0, 0, 1}, 0, Slot::kInvalid);
   EXPECT_CALL(mockChaosBag, GetToken()).WillOnce(Return(chaosToken));
   EXPECT_CALL(mockPlayer, GetSkill()).WillOnce(ReturnRef(playerSkill));
   auto [succeed, difference] = skillTest(skillTested, mockPlayer, mockChaosBag, {asset});
@@ -86,7 +86,7 @@ TEST_F(Test_SkillTestWillpower, WillpowerTestFailsWithCommitedCardsFromOtherSkil
 {
   ChaosToken chaosToken{ChaosToken::Token::kValue, -2};
   std::shared_ptr<Card> asset =
-    std::make_shared<Asset>("InventedCard", Faction::kInvalid, 0, Skill{0, 1, 0, 0}, Slot::kInvalid);
+    std::make_shared<Asset>("InventedCard", Faction::kInvalid, Skill{0, 1, 0, 0}, 0, Slot::kInvalid);
   EXPECT_CALL(mockChaosBag, GetToken()).WillOnce(Return(chaosToken));
   EXPECT_CALL(mockPlayer, GetSkill()).WillOnce(ReturnRef(playerSkill));
   auto [succeed, difference] = skillTest(skillTested, mockPlayer, mockChaosBag, {asset});
